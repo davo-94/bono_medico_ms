@@ -143,40 +143,51 @@ if (recetaDTO.getDiagnosticos() != null) {
 
     //Método de conversión Entity -> DTO (para no repetir código)
 
-    private RecetaDTO convertirARecetaDTO(Receta receta){
+    private RecetaDTO convertirARecetaDTO(Receta receta) {
 
-        //Convertir lista de medicamentos
-        List <MedicamentoDTO> medicamentosDTO = receta.getMedicamentos().stream()
-            .map(med -> new MedicamentoDTO(
-                med.getCatalogoMedicamento().getIdCatalogoMedicamento(),
-                med.getCatalogoMedicamento().getNombre(),
-                med.getDosis(), 
-                med.getFrecuencia(), 
-                med.getObservaciones()
-            ))
-            .collect(Collectors.toList());
+    // Convertir lista de medicamentos
+    List<MedicamentoDTO> medicamentosDTO = receta.getMedicamentos().stream()
+        .map(med -> new MedicamentoDTO(
+            med.getCatalogoMedicamento().getIdCatalogoMedicamento(),
+            med.getCatalogoMedicamento().getNombre(),
+            med.getDosis(),
+            med.getFrecuencia(),
+            med.getObservaciones()
+        ))
+        .collect(Collectors.toList());
 
-        //Convertir lista de diagnósticos
-        List<DiagnosticoDTO> diagnosticosDTO = receta.getDiagnosticos().stream()
-            .map(diag -> new DiagnosticoDTO(
-                diag.getCodigo(), 
-                diag.getDescripcion(), 
-                diag.getFechaDiagnostico(),
-                receta.getIdReceta()
-            ))
-            .collect(Collectors.toList());
-        
-        //Retornar el DTO completo
-        return new RecetaDTO(
-            receta.getIdReceta(),
-            receta.getFechaEmision(),
-            receta.getEstado(),
-            receta.getPaciente().getIdPersona(), 
-            receta.getMedico().getIdProfesional(),
-            medicamentosDTO,
-            diagnosticosDTO
-        );
-    }
+    // Convertir lista de diagnósticos
+    List<DiagnosticoDTO> diagnosticosDTO = receta.getDiagnosticos().stream()
+        .map(diag -> new DiagnosticoDTO(
+            diag.getCodigo(),
+            diag.getDescripcion(),
+            diag.getFechaDiagnostico(),
+            receta.getIdReceta()
+        ))
+        .collect(Collectors.toList());
+
+    // Crear DTO base
+    RecetaDTO dto = new RecetaDTO(
+        receta.getIdReceta(),
+        receta.getFechaEmision(),
+        receta.getEstado(),
+        receta.getPaciente().getIdPersona(),
+        receta.getMedico().getIdProfesional(),
+        medicamentosDTO,
+        diagnosticosDTO
+    );
+
+    // Agregar nombres reales
+    dto.setNombrePaciente(
+        receta.getPaciente().getNombre() + " " + receta.getPaciente().getApellidoPaterno()
+    );
+    dto.setNombreMedico(
+        receta.getMedico().getPersona().getNombre() + " " + receta.getMedico().getPersona().getApellidoPaterno()
+    );
+
+    return dto;
+}
+
 
     @Override
     public RecetaDTO actualizarEstado(Integer id, String nuevoEstado){
